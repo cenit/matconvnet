@@ -26,26 +26,41 @@ if(MSVC)
   endif()
 endif()
 
-#add_library(matconvnet SHARED
-# matlab/src/bits/data.cpp
-# matlab/src/bits/datamex.cpp
-# matlab/src/bits/nnconv.cpp
-# matlab/src/bits/nnbias.cpp
-# matlab/src/bits/nnfullyconnected.cpp
-# matlab/src/bits/nnsubsample.cpp
-# matlab/src/bits/nnpooling.cpp
-# matlab/src/bits/nnnormalize.cpp
-# matlab/src/bits/nnnormalizelp.cpp
-# matlab/src/bits/nnbnorm.cpp
-# matlab/src/bits/nnbilinearsampler.cpp
-# matlab/src/bits/nnroipooling.cpp
-# matlab/src/bits/impl/im2row_cpu.cpp
-# matlab/src/bits/impl/copy_cpu.cpp
-# matlab/src/bits/impl/tinythread.cpp
-# matlab/src/bits/impl/imread_libjpeg.cpp
-# matlab/src/bits/imread.cpp
-#)
-#set_property(TARGET matconvnet PROPERTY POSITION_INDEPENDENT_CODE ON)
+if(NOT MATLAB_BLAS_LIBRARY)
+  include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
+  find_library(MATLAB_BLAS_LIBRARY_RELEASE NAMES mwblas libmwblas ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft) #bin/maci64)
+  find_library(MATLAB_BLAS_LIBRARY_DEBUG   NAMES mwblasd libmwblasd ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft ) #bin/maci64)
+  select_library_configurations(MATLAB_BLAS)
+endif()
+
+if(APPLE)
+  set(MATLAB_BLAS_LIBRARY "/Applications/MATLAB_R2017b.app/bin/maci64/libmwblas.dylib")
+endif()
+
+add_definitions(-DENABLE_DOUBLE)
+
+matlab_add_mex(NAME matconvnet SRC
+ matlab/src/bits/data.cpp
+ matlab/src/bits/datamex.cpp
+ matlab/src/bits/nnconv.cpp
+ matlab/src/bits/nnbias.cpp
+ matlab/src/bits/nnfullyconnected.cpp
+ matlab/src/bits/nnsubsample.cpp
+ matlab/src/bits/nnpooling.cpp
+ matlab/src/bits/nnnormalize.cpp
+ matlab/src/bits/nnnormalizelp.cpp
+ matlab/src/bits/nnbnorm.cpp
+ matlab/src/bits/nnbilinearsampler.cpp
+ matlab/src/bits/nnroipooling.cpp
+ matlab/src/bits/impl/im2row_cpu.cpp
+ matlab/src/bits/impl/copy_cpu.cpp
+ matlab/src/bits/impl/tinythread.cpp
+ matlab/src/bits/impl/imread_libjpeg.cpp
+ matlab/src/bits/imread.cpp
+ LINK_TO
+ ${JPEG_LIBRARIES}
+ ${MATLAB_BLAS_LIBRARY}
+)
 
 list(APPEND vl_files
 vl_nnconv            matlab/src/vl_nnconv.cpp
@@ -60,23 +75,6 @@ vl_taccummex         matlab/src/vl_taccummex.cpp
 vl_tmove             matlab/src/vl_tmove.cpp
 vl_imreadjpeg        matlab/src/vl_imreadjpeg.cpp
 vl_imreadjpeg_old    matlab/src/vl_imreadjpeg_old.cpp
-data                 matlab/src/bits/data.cpp
-datamex              matlab/src/bits/datamex.cpp
-nnconv               matlab/src/bits/nnconv.cpp
-nnbias               matlab/src/bits/nnbias.cpp
-nnfullyconnected     matlab/src/bits/nnfullyconnected.cpp
-nnsubsample          matlab/src/bits/nnsubsample.cpp
-nnpooling            matlab/src/bits/nnpooling.cpp
-nnnormalize          matlab/src/bits/nnnormalize.cpp
-nnnormalizelp        matlab/src/bits/nnnormalizelp.cpp
-nnbnorm              matlab/src/bits/nnbnorm.cpp
-nnbilinearsampler    matlab/src/bits/nnbilinearsampler.cpp
-nnroipooling         matlab/src/bits/nnroipooling.cpp
-im2row_cpu           matlab/src/bits/impl/im2row_cpu.cpp
-copy_cpu             matlab/src/bits/impl/copy_cpu.cpp
-tinythread           matlab/src/bits/impl/tinythread.cpp
-imread_libjpeg       matlab/src/bits/impl/imread_libjpeg.cpp
-imread               matlab/src/bits/imread.cpp
 )
 
 list(LENGTH vl_files size)
@@ -85,6 +83,6 @@ foreach(val RANGE 0 ${size} 2)
   math(EXPR nextval "${val} + 1")
   list(GET vl_files ${val} mex)
   list(GET vl_files ${nextval} src)
-  matlab_add_mex(NAME ${mex} SRC ${src} LINK_TO ${JPEG_LIBRARY})
+  matlab_add_mex(NAME ${mex} SRC ${src} LINK_TO ${JPEG_LIBRARY} matconvnet)
   install(TARGETS ${mex} DESTINATION ${CMAKE_SOURCE_DIR}/matlab/mex/${Matlab_MEX_EXTENSION}/)
 endforeach()

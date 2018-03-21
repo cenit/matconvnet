@@ -29,7 +29,7 @@ endif
 
 # macOS
 ARCH ?= maci64
-MATLABROOT ?= /Applications/MATLAB_R2017a.app
+MATLABROOT ?= /Applications/MATLAB_R2017b.app
 CUDAROOT ?= /Developer/NVIDIA/CUDA-8.0
 # Remark: each MATLAB version requires a particular CUDA Toolkit version.
 # Note that multiple CUDA Toolkits can be installed.
