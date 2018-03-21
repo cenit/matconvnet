@@ -2,11 +2,10 @@
 #define COMPAT_H
 
 #ifdef _MSC_VER
-#define snprintf _snprintf
-#define vsnprintf _vsnprintf
 #define __func__ __FUNCTION__
-#undef max
-#undef min
+#define NOMINMAX
+//#undef max
+//#undef min
 
 #ifdef  _WIN64
 typedef signed __int64 ssize_t;
@@ -17,6 +16,8 @@ typedef signed int ssize_t;
 #if _MSC_VER < 1700
 #define false 0
 #define true 1
+#define snprintf _snprintf
+#define vsnprintf _vsnprintf
 #elif _MSC_VER > 1700
 #include <stdbool.h>
 #endif // _MSC_VER < 1700

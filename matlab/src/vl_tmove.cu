@@ -43,14 +43,14 @@ the terms of the BSD license (see the COPYING file).
 
 /**
  \file vl_tmove.cu
- 
+
  The `vl_tmove` utility implements an efficient mechanism to exchange
  tensor data between different MATLAB processes. Presently, it is
  limited to processes running on the same host, but future extensions
  can integrate networked environments. Even limited to a single
  host, this functionality is important because MATLAB multiple GPU
  support uses different processess for different GPUs.
- 
+
  The key idea is to implement a reduction tree, in which each MATLAB
  process is connected to a parent and a number of children. When a tensor
  needs to be accumulated, a node receives copies form the children,
@@ -59,23 +59,23 @@ the terms of the BSD license (see the COPYING file).
  tensor is sent back towards the leaves. This communication mechanism
  is designed to reduce the amount of data transfers from O(n^2)
  for the trivial n-to-n communication of tensor copies to O(n).
- 
+
  A second strategy used to significantly improve the speed is to allow
  the transfer of tensor data to proceed in the background, while MATLAB is busy
  running the rest of the network. This is achieved by isolating
  all communications in a supervisory thread.
 
  # Notable facts
- 
+
  * Communications between thread uses UNIX-domain sockets (extensible
    to INet sockets in the future). These are used to send lightweight
    cohordination messages.
- 
+
  * Data passing on local machines uses a shared memory map between
    processes. The shared memory contains a copy of each tensor for each
    process. GPU tensors may either be allocated internally
    by `vl_tmove` (in which case MATLAB may forget them)
-   or may remember pointers to MATLAB's memory (inplace). 
+   or may remember pointers to MATLAB's memory (inplace).
    The latter is slightly unsafe, but much faster as it saves several copies.
    In any case, `vl_tmove` allocates a GPU buffer as large as
    the largest tensor as scratch space (and for direct GPU communication).
@@ -372,7 +372,7 @@ private:
     bool operator==(int theLab) { return lab == theLab ; }
     SharedTensorPeerInstance()
       : lab(-1), state(ready), transaction(0),
-        mappedCpuMemory(NULL), mappedGpuMemory(NULL), accumulated(false), 
+        mappedCpuMemory(NULL), mappedGpuMemory(NULL), accumulated(false),
         finalTransaction((size_t)-1) { }
   } ;
   typedef std::vector<std::vector<SharedTensorPeerInstance> > peerTensors_t ;

@@ -20,13 +20,23 @@ endif()
 include_directories(${JPEG_INCLUDE_DIR})
 
 if(MSVC)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
   add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+  add_definitions(-DENABLE_DOUBLE)
   if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
     string(REGEX REPLACE "/W[0-4]" "/W1" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
   endif()
 endif()
 
-matlab_add_mex(NAME matconvnet SRC
+# Snippet to locate the matlab-blas library to link
+if(NOT MATLAB_BLAS_LIBRARY)
+  include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
+  find_library(MATLAB_BLAS_LIBRARY_RELEASE NAMES mwblas libmwblas   ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft)
+  find_library(MATLAB_BLAS_LIBRARY_DEBUG   NAMES mwblasd libmwblasd ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft)
+  select_library_configurations(MATLAB_BLAS)
+endif()
+
+matlab_add_mex(NAME matconvnet SHARED SRC
  matlab/src/bits/data.cpp
  matlab/src/bits/datamex.cpp
  matlab/src/bits/nnconv.cpp
@@ -44,42 +54,28 @@ matlab_add_mex(NAME matconvnet SRC
  matlab/src/bits/impl/tinythread.cpp
  matlab/src/bits/impl/imread_libjpeg.cpp
  matlab/src/bits/imread.cpp
+ LINK_TO
+ ${MATLAB_BLAS_LIBRARY}
+ ${JPEG_LIBRARY}
 )
-#set_property(TARGET matconvnet PROPERTY POSITION_INDEPENDENT_CODE ON)
+
+if(NOT MSVC)
+  set(VL_TMOVE "vl_tmove" "matlab/src/vl_tmove.cpp")
+endif()
 
 list(APPEND vl_files
-vl_nnconv            matlab/src/vl_nnconv.cpp
-vl_nnconvt           matlab/src/vl_nnconvt.cpp
-vl_nnpool            matlab/src/vl_nnpool.cpp
-vl_nnnormalize       matlab/src/vl_nnnormalize.cpp
-vl_nnnormalizelp     matlab/src/vl_nnnormalizelp.cpp
-vl_nnbnorm           matlab/src/vl_nnbnorm.cpp
-vl_nnbilinearsampler matlab/src/vl_nnbilinearsampler.cpp
-vl_nnroipool         matlab/src/vl_nnroipool.cpp
-vl_taccummex         matlab/src/vl_taccummex.cpp
-vl_tmove             matlab/src/vl_tmove.cpp
 vl_imreadjpeg        matlab/src/vl_imreadjpeg.cpp
 vl_imreadjpeg_old    matlab/src/vl_imreadjpeg_old.cpp
-
-
-
-#data                 matlab/src/bits/data.cpp
-#datamex              matlab/src/bits/datamex.cpp
-#nnconv               matlab/src/bits/nnconv.cpp
-#nnbias               matlab/src/bits/nnbias.cpp
-#nnfullyconnected     matlab/src/bits/nnfullyconnected.cpp
-#nnsubsample          matlab/src/bits/nnsubsample.cpp
-#nnpooling            matlab/src/bits/nnpooling.cpp
-#nnnormalize          matlab/src/bits/nnnormalize.cpp
-#nnnormalizelp        matlab/src/bits/nnnormalizelp.cpp
-#nnbnorm              matlab/src/bits/nnbnorm.cpp
-#nnbilinearsampler    matlab/src/bits/nnbilinearsampler.cpp
-#nnroipooling         matlab/src/bits/nnroipooling.cpp
-#im2row_cpu           matlab/src/bits/impl/im2row_cpu.cpp
-#copy_cpu             matlab/src/bits/impl/copy_cpu.cpp
-#tinythread           matlab/src/bits/impl/tinythread.cpp
-#imread_libjpeg       matlab/src/bits/impl/imread_libjpeg.cpp
-#imread               matlab/src/bits/imread.cpp
+vl_nnbilinearsampler matlab/src/vl_nnbilinearsampler.cpp
+vl_nnbnorm           matlab/src/vl_nnbnorm.cpp
+vl_nnconv            matlab/src/vl_nnconv.cpp
+vl_nnconvt           matlab/src/vl_nnconvt.cpp
+vl_nnnormalize       matlab/src/vl_nnnormalize.cpp
+vl_nnnormalizelp     matlab/src/vl_nnnormalizelp.cpp
+vl_nnpool            matlab/src/vl_nnpool.cpp
+vl_nnroipool         matlab/src/vl_nnroipool.cpp
+vl_taccummex         matlab/src/vl_taccummex.cpp
+${VL_TMOVE}
 )
 
 list(LENGTH vl_files size)
