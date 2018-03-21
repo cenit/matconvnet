@@ -44,3 +44,4 @@ doc/site/theme/js/npm.js
 doc/figures/svg/*.idraw
 
 [Bb]uild*/
+.DS_Store
