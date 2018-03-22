@@ -36,6 +36,7 @@ if(NOT Matlab_BLAS_LIBRARY)
   find_library(Matlab_BLAS_LIBRARY_DEBUG   NAMES mwblasd libmwblasd ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft)
   select_library_configurations(Matlab_BLAS)
 endif()
+message("************** ${Matlab_BLAS_LIBRARY}")
 
 add_library(matconvnet SHARED
  matlab/src/bits/data.cpp
@@ -57,7 +58,7 @@ add_library(matconvnet SHARED
  matlab/src/bits/imread.cpp
 )
 set_property(TARGET matconvnet PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(matconvnet ${MATLAB_BLAS_LIBRARY} ${JPEG_LIBRARY} ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY})
+target_link_libraries(matconvnet ${Matlab_BLAS_LIBRARY} ${JPEG_LIBRARY} ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY})
 
 if(NOT MSVC)
   set(VL_TMOVE "vl_tmove" "matlab/src/vl_tmove.cpp")
