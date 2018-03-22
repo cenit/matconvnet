@@ -11,6 +11,10 @@ This file is part of the VLFeat library and is made available under
 the terms of the BSD license (see the COPYING file).
 */
 
+#ifdef WIN32
+#define NOMINMAX
+#endif
+
 #include <assert.h>
 #include <vector>
 #include <string>

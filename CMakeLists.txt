@@ -14,22 +14,24 @@ find_package(Matlab COMPONENTS MX_LIBRARY REQUIRED)
 find_package(JPEG REQUIRED)
 find_package(OpenMP REQUIRED)
 if (OPENMP_FOUND)
-  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
 include_directories(${JPEG_INCLUDE_DIR})
 
 if(MSVC)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
   add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
-  if(CMAKE_C_FLAGS MATCHES "/W[0-4]")
-    string(REGEX REPLACE "/W[0-4]" "/W1" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+  add_definitions(-DENABLE_DOUBLE)
+  if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
+    string(REGEX REPLACE "/W[0-4]" "/W1" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
   endif()
 endif()
 
 if(NOT MATLAB_BLAS_LIBRARY)
   include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
-  find_library(MATLAB_BLAS_LIBRARY_RELEASE NAMES mwblas libmwblas ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft) #bin/maci64)
-  find_library(MATLAB_BLAS_LIBRARY_DEBUG   NAMES mwblasd libmwblasd ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft ) #bin/maci64)
+  find_library(MATLAB_BLAS_LIBRARY_RELEASE NAMES mwblas libmwblas   ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft) #bin/maci64)
+  find_library(MATLAB_BLAS_LIBRARY_DEBUG   NAMES mwblasd libmwblasd ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft) #bin/maci64)
   select_library_configurations(MATLAB_BLAS)
 endif()
 
@@ -39,7 +41,7 @@ endif()
 
 add_definitions(-DENABLE_DOUBLE)
 
-matlab_add_mex(NAME matconvnet SRC
+matlab_add_mex(NAME matconvnet SHARED SRC
  matlab/src/bits/data.cpp
  matlab/src/bits/datamex.cpp
  matlab/src/bits/nnconv.cpp
@@ -58,23 +60,27 @@ matlab_add_mex(NAME matconvnet SRC
  matlab/src/bits/impl/imread_libjpeg.cpp
  matlab/src/bits/imread.cpp
  LINK_TO
- ${JPEG_LIBRARIES}
  ${MATLAB_BLAS_LIBRARY}
+ ${JPEG_LIBRARY}
 )
 
+if(NOT MSVC)
+  set(VL_TMOVE "vl_tmove" "matlab/src/vl_tmove.cpp")
+endif()
+
 list(APPEND vl_files
-vl_nnconv            matlab/src/vl_nnconv.cpp
-vl_nnconvt           matlab/src/vl_nnconvt.cpp
-vl_nnpool            matlab/src/vl_nnpool.cpp
-vl_nnnormalize       matlab/src/vl_nnnormalize.cpp
-vl_nnnormalizelp     matlab/src/vl_nnnormalizelp.cpp
-vl_nnbnorm           matlab/src/vl_nnbnorm.cpp
-vl_nnbilinearsampler matlab/src/vl_nnbilinearsampler.cpp
-vl_nnroipool         matlab/src/vl_nnroipool.cpp
-vl_taccummex         matlab/src/vl_taccummex.cpp
-vl_tmove             matlab/src/vl_tmove.cpp
 vl_imreadjpeg        matlab/src/vl_imreadjpeg.cpp
 vl_imreadjpeg_old    matlab/src/vl_imreadjpeg_old.cpp
+vl_nnbilinearsampler matlab/src/vl_nnbilinearsampler.cpp
+vl_nnbnorm           matlab/src/vl_nnbnorm.cpp
+vl_nnconv            matlab/src/vl_nnconv.cpp
+vl_nnconvt           matlab/src/vl_nnconvt.cpp
+vl_nnnormalize       matlab/src/vl_nnnormalize.cpp
+vl_nnnormalizelp     matlab/src/vl_nnnormalizelp.cpp
+vl_nnpool            matlab/src/vl_nnpool.cpp
+vl_nnroipool         matlab/src/vl_nnroipool.cpp
+vl_taccummex         matlab/src/vl_taccummex.cpp
+${VL_TMOVE}
 )
 
 list(LENGTH vl_files size)
