@@ -32,11 +32,10 @@ endif()
 # Snippet to locate the matlab-blas library to link
 if(NOT Matlab_BLAS_LIBRARY)
   include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
-  find_library(Matlab_BLAS_LIBRARY_RELEASE NAMES mwblas libmwblas   ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft bin/maci64)
-  find_library(Matlab_BLAS_LIBRARY_DEBUG   NAMES mwblasd libmwblasd ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft)
+  find_library(Matlab_BLAS_LIBRARY_RELEASE NAMES mwblas  libmwblas  PATHS ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft bin/maci64)
+  find_library(Matlab_BLAS_LIBRARY_DEBUG   NAMES mwblasd libmwblasd PATHS ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft bin/maci64)
   select_library_configurations(Matlab_BLAS)
 endif()
-message("************** ${Matlab_BLAS_LIBRARY}")
 
 add_library(matconvnet SHARED
  matlab/src/bits/data.cpp
