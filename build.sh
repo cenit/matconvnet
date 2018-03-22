@@ -4,7 +4,7 @@
 if [[ "$OSTYPE" == "darwin"* ]]; then
  export CC="/usr/local/bin/gcc-7"
  export CXX="/usr/local/bin/g++-7"
- BLASLIB="-DMATLAB_BLAS_LIBRARY=/Applications/MATLAB_R2017b.app/bin/maci64/libmwblas.dylib"
+ BLASLIB="-DMatlab_BLAS_LIBRARY=/Applications/MATLAB_R2017b.app/bin/maci64/libmwblas.dylib"
 fi
 
 mkdir -p build
