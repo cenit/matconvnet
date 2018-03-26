@@ -45,3 +45,5 @@ doc/figures/svg/*.idraw
 
 [Bb]uild*/
 .DS_Store
+*.mex*
+*.dll

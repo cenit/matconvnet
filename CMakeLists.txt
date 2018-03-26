@@ -10,6 +10,15 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
 
+### Set output directories on a per-configuration base
+# Single configuration
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/matlab )
+# Multi configuration
+foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+    string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
+    set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_SOURCE_DIR}/matlab )
+endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
+
 find_package(Matlab COMPONENTS MX_LIBRARY REQUIRED)
 find_package(JPEG REQUIRED)
 find_package(OpenMP REQUIRED)
@@ -18,8 +27,7 @@ if (OPENMP_FOUND)
 endif()
 
 add_definitions(-DENABLE_DOUBLE)
-include_directories(${JPEG_INCLUDE_DIR})
-include_directories(${Matlab_INCLUDE_DIRS})
+include_directories(${JPEG_INCLUDE_DIR} ${Matlab_INCLUDE_DIRS})
 
 if(MSVC)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
@@ -27,6 +35,7 @@ if(MSVC)
   if(CMAKE_CXX_FLAGS MATCHES "/W[0-4]")
     string(REGEX REPLACE "/W[0-4]" "/W1" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
   endif()
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4068")
 endif()
 
 # Snippet to locate the matlab-blas library to link
@@ -85,5 +94,4 @@ foreach(val RANGE 0 ${size} 2)
   list(GET vl_files ${val} mex)
   list(GET vl_files ${nextval} src)
   matlab_add_mex(NAME ${mex} SRC ${src} LINK_TO ${JPEG_LIBRARY} matconvnet ${Matlab})
-  install(TARGETS ${mex} DESTINATION ${CMAKE_SOURCE_DIR}/matlab/mex/${Matlab_MEX_EXTENSION}/)
 endforeach()

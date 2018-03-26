@@ -12,7 +12,7 @@ paths = strsplit(path, pathsep) ;
 mexpath = fullfile(fileparts(mfilename('fullpath')), 'mex') ;
 
 if ~exist(mexpath, 'dir') || ~exist(fullfile(mexpath, [fname, '.', mexext]), 'file')
-  error('MatConvNet not compiled or the compilation fialed. Please run `vl_compilenn`.');
+  error('MatConvNet not compiled or the compilation failed. Please run `vl_compilenn`.');
 end
 
 if ~ismember(mexpath, paths)
