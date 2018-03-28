@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.5)
 project (matconvnet)
 
 set(default_build_type "Release")
@@ -19,7 +19,6 @@ foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
     set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_SOURCE_DIR}/matlab )
 endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 
-find_package(Matlab COMPONENTS MX_LIBRARY REQUIRED)
 find_package(JPEG REQUIRED)
 find_package(OpenMP REQUIRED)
 if (OPENMP_FOUND)
@@ -27,7 +26,7 @@ if (OPENMP_FOUND)
 endif()
 
 add_definitions(-DENABLE_DOUBLE)
-include_directories(${JPEG_INCLUDE_DIR} ${Matlab_INCLUDE_DIRS})
+include_directories(${JPEG_INCLUDE_DIR})
 
 if(MSVC)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
@@ -36,14 +35,6 @@ if(MSVC)
     string(REGEX REPLACE "/W[0-4]" "/W1" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
   endif()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4068")
-endif()
-
-# Snippet to locate the matlab-blas library to link
-if(NOT Matlab_BLAS_LIBRARY)
-  include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
-  find_library(Matlab_BLAS_LIBRARY_RELEASE NAMES mwblas  libmwblas  PATHS ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft bin/maci64)
-  find_library(Matlab_BLAS_LIBRARY_DEBUG   NAMES mwblasd libmwblasd PATHS ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft bin/maci64)
-  select_library_configurations(Matlab_BLAS)
 endif()
 
 add_library(matconvnet SHARED
@@ -66,7 +57,7 @@ add_library(matconvnet SHARED
  matlab/src/bits/imread.cpp
 )
 set_property(TARGET matconvnet PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(matconvnet ${Matlab_BLAS_LIBRARY} ${JPEG_LIBRARY} ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY})
+target_link_libraries(matconvnet ${JPEG_LIBRARY})
 
 if(NOT MSVC)
   set(VL_TMOVE "vl_tmove" "matlab/src/vl_tmove.cpp")
@@ -93,5 +84,7 @@ foreach(val RANGE 0 ${size} 2)
   math(EXPR nextval "${val} + 1")
   list(GET vl_files ${val} mex)
   list(GET vl_files ${nextval} src)
-  matlab_add_mex(NAME ${mex} SRC ${src} LINK_TO ${JPEG_LIBRARY} matconvnet ${Matlab})
+  add_library(${mex} ${src})
+  set_property(TARGET ${mex} PROPERTY POSITION_INDEPENDENT_CODE ON)
+  target_link_libraries(${mex} ${JPEG_LIBRARY} matconvnet)
 endforeach()
