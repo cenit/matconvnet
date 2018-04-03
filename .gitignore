@@ -47,3 +47,4 @@ doc/figures/svg/*.idraw
 .DS_Store
 *.mex*
 *.dll
+.vscode/

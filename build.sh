@@ -9,6 +9,6 @@ fi
 mkdir -p build
 cd build
 cmake ..
-cmake --build . --target install
+cmake --build .
 #make VERBOSE=1
 cd ..

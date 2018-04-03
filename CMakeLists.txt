@@ -1,4 +1,5 @@
 cmake_minimum_required (VERSION 3.5)
+set(CMAKE_CXX_STANDARD 11)
 project (matconvnet)
 
 set(default_build_type "Release")
@@ -20,6 +21,7 @@ foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
 endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 
 find_package(JPEG REQUIRED)
+find_package(BLAS REQUIRED)
 find_package(OpenMP REQUIRED)
 if (OPENMP_FOUND)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
@@ -27,6 +29,7 @@ endif()
 
 add_definitions(-DENABLE_DOUBLE)
 include_directories(${JPEG_INCLUDE_DIR})
+include_directories(${BLAS_INCLUDE_DIR})  # not defined by FindBLAS...!!! fix!
 
 if(MSVC)
   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
@@ -39,7 +42,7 @@ endif()
 
 add_library(matconvnet SHARED
  matlab/src/bits/data.cpp
- matlab/src/bits/datamex.cpp
+# matlab/src/bits/datamex.cpp
  matlab/src/bits/nnconv.cpp
  matlab/src/bits/nnbias.cpp
  matlab/src/bits/nnfullyconnected.cpp
@@ -57,7 +60,7 @@ add_library(matconvnet SHARED
  matlab/src/bits/imread.cpp
 )
 set_property(TARGET matconvnet PROPERTY POSITION_INDEPENDENT_CODE ON)
-target_link_libraries(matconvnet ${JPEG_LIBRARY})
+target_link_libraries(matconvnet ${JPEG_LIBRARY} ${BLAS_LIBRARIES})
 
 if(NOT MSVC)
   set(VL_TMOVE "vl_tmove" "matlab/src/vl_tmove.cpp")
