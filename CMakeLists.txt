@@ -21,7 +21,23 @@ foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
 endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 
 find_package(JPEG REQUIRED)
-find_package(BLAS REQUIRED)
+if (NOT APPLE)
+  find_package(BLAS REQUIRED)
+else()
+  find_path(BLAS_INCLUDE_DIR cblas.h
+    /usr/include
+    /usr/local/include
+  )
+  find_library(BLAS_LIBRARIES libblas.dylib
+    /usr/lib
+    /usr/local/lib
+  )
+  if (BLAS_INCLUDE_DIR AND BLAS_LIBRARIES)
+    message(STATUS "OpenBLAS found: ${BLAS_INCLUDE_DIR}")
+  else()
+    message(ERROR "OpenBLAS not found")
+  endif()
+endif()
 find_package(OpenMP REQUIRED)
 if (OPENMP_FOUND)
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
