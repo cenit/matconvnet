@@ -1,5 +1,6 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.5)
 project (matconvnet)
+set(CMAKE_CXX_STANDARD 11)
 
 set(default_build_type "Release")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -9,15 +10,6 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
     "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
 endif()
-
-### Set output directories on a per-configuration base
-# Single configuration
-set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/matlab )
-# Multi configuration
-foreach( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
-    string( TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG )
-    set( CMAKE_RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_SOURCE_DIR}/matlab )
-endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 
 find_package(Matlab COMPONENTS MX_LIBRARY REQUIRED)
 find_package(JPEG REQUIRED)
@@ -41,8 +33,8 @@ endif()
 # Snippet to locate the matlab-blas library to link
 if(NOT Matlab_BLAS_LIBRARY)
   include(${CMAKE_ROOT}/Modules/SelectLibraryConfigurations.cmake)
-  find_library(Matlab_BLAS_LIBRARY_RELEASE NAMES mwblas  libmwblas  PATHS ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft bin/maci64)
-  find_library(Matlab_BLAS_LIBRARY_DEBUG   NAMES mwblasd libmwblasd PATHS ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft bin/maci64)
+  find_library(Matlab_BLAS_LIBRARY_RELEASE NAMES mwblas  libmwblas  PATHS ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft bin/maci64 /bin/glnxa64)
+  find_library(Matlab_BLAS_LIBRARY_DEBUG   NAMES mwblasd libmwblasd PATHS ${Matlab_ROOT_DIR} PATH_SUFFIXES extern/lib/win64/microsoft bin/maci64 /bin/glnxa64)
   select_library_configurations(Matlab_BLAS)
 endif()
 
@@ -94,4 +86,5 @@ foreach(val RANGE 0 ${size} 2)
   list(GET vl_files ${val} mex)
   list(GET vl_files ${nextval} src)
   matlab_add_mex(NAME ${mex} SRC ${src} LINK_TO ${JPEG_LIBRARY} matconvnet ${Matlab})
+  install(TARGETS ${mex} DESTINATION ${CMAKE_SOURCE_DIR}/matlab/)
 endforeach()
