@@ -59,6 +59,7 @@ add_library(matconvnet SHARED
 )
 set_property(TARGET matconvnet PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(matconvnet ${Matlab_BLAS_LIBRARY} ${JPEG_LIBRARY} ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY})
+install(TARGETS matconvnet DESTINATION ${CMAKE_SOURCE_DIR}/matlab/)
 
 if(NOT MSVC)
   set(VL_TMOVE "vl_tmove" "matlab/src/vl_tmove.cpp")
